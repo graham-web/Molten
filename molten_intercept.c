@@ -23,6 +23,13 @@
 #define GET_FUNC_ARG_UNDEC(param, arg_num) param = ((zval *)(frame->ori_args) + arg_num)
 #endif
 
+bool isValidIpAddress(char *ipAddress)
+{
+    struct sockaddr_in sa;
+    int result = inet_pton(AF_INET, ipAddress, &(sa.sin_addr));
+    return result != 0;
+}
+
 /* {{{ pt intercept hit function */
 zend_bool mo_intercept_hit(mo_interceptor_t *pit, mo_interceptor_ele_t **eleDest, char *class_name, char *function_name)
 {
@@ -378,6 +385,11 @@ static void analyze_data_source(zval *span, char *db_type, char *data_source, mo
     char *port = pcre_common_match("(port=([^;\\s]+))", sizeof("(port=([^;\\s]+))")-1, data_source);
     if (host != NULL && port != NULL) {
         int i_port = atoi((const char*)port);
+
+        if (!isValidIpAddress(host)) {
+          strcpy(host, "127.0.0.1");
+        }
+
         pit->psb->span_add_ba(span, "sa", "true", frame->exit_time, db_type, host, i_port, BA_SA);
     }
 
