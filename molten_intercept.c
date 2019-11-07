@@ -541,11 +541,11 @@ static void redis_record(mo_interceptor_t *pit, mo_frame_t *frame)
     zval function;
     MO_ZVAL_STRING(&function, "getHost", 1);
     if (mo_call_user_function(NULL, &object, &function, &host, 0, NULL) == SUCCESS) { 
-        if (Z_TYPE(host) != IS_STRING) {
-            MO_ZVAL_STRING(&host, "unkown", 1);
+        if (Z_TYPE(host) != IS_STRING || !isValidIpAddress(Z_STRVAL(host))) {
+            MO_ZVAL_STRING(&host, "127.0.0.1", 1);
         }
     } else {
-        MO_ZVAL_STRING(&host, "unkown", 1);
+        MO_ZVAL_STRING(&host, "127.0.0.1", 1);
     }
     
     mo_zval_dtor(&function);
